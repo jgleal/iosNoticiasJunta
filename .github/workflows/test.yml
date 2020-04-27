@@ -1,0 +1,45 @@
+name: Build iOS app
+
+on:
+  push
+
+jobs:
+  build:
+    runs-on: macos-latest
+    env:
+      APP_ID: es.juntadeandalucia.noticiasandalucia
+      PROJECT_WORKSPACE: Portavoz.xcworkspace
+      APP_NAME: Portavoz
+      PROJECT_SCHEME: PortavozPRO
+      PROJECT_CONFIGURATION: PortavozPRO
+      UUID_PROVISION: bece3ee8-b1c4-42ec-abbc-6f28c0fc961d
+      DEVELOPMENT_TEAM: 2P43RZUB7Q
+
+    steps:
+      - uses: actions/checkout@v2.1.0
+      - name: Get source from external repo
+        run: git clone https://${{ secrets.REPO_USER }}:${{ secrets.REPO_PASS }}@gitlab.juntadeandalucia.es/noticias-portavoz/ios-app-noticias-portavoz.git source --depth 1
+      - name: Switch XCode Version
+        run: sudo xcode-select -s /Applications/Xcode_11.2.1.app
+      - name: Setup cert
+        run: ./.github/secrets/decrypt_certs.sh
+        env:
+          IOS_CERTIFICATE_PASS: ${{ secrets.IOS_CERTIFICATE_PASS }}
+          ENCRYPT_PASS: ${{ secrets.ENCRYPT_PASS }}
+      - name: Fix manual sign pods
+        run: |
+          echo "post_install do |installer| 
+            installer.pods_project.targets.each do |target|
+                target.build_configurations.each do |config|
+                  config.build_settings['EXPANDED_CODE_SIGN_IDENTITY'] = \"\"
+                  config.build_settings['CODE_SIGNING_REQUIRED'] = \"NO\"
+                  config.build_settings['CODE_SIGNING_ALLOWED'] = \"NO\"
+                end
+            end
+          end" >> Podfile
+        working-directory: source
+      - name: Upload podfile
+        uses: actions/upload-artifact@v1
+        with:
+          name: 'app_build' #not accepts env variable i.e. $APP_NAME
+          path: './source/Podfile'
