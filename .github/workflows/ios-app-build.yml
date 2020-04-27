@@ -28,15 +28,16 @@ jobs:
           IOS_CERTIFICATE_PASS: ${{ secrets.IOS_CERTIFICATE_PASS }}
           ENCRYPT_PASS: ${{ secrets.ENCRYPT_PASS }}
       - name: Fix manual sign pods
-        run: echo "post_install do |installer| 
-                    installer.pods_project.targets.each do |target|
-                        target.build_configurations.each do |config|
-                          config.build_settings['EXPANDED_CODE_SIGN_IDENTITY'] = \"\"
-                          config.build_settings['CODE_SIGNING_REQUIRED'] = \"NO\"
-                          config.build_settings['CODE_SIGNING_ALLOWED'] = \"NO\"
-                        end
-                      end
-                    end" >> Podfile
+        run: |
+          echo "post_install do |installer| 
+            installer.pods_project.targets.each do |target|
+                target.build_configurations.each do |config|
+                  config.build_settings['EXPANDED_CODE_SIGN_IDENTITY'] = \"\"
+                  config.build_settings['CODE_SIGNING_REQUIRED'] = \"NO\"
+                  config.build_settings['CODE_SIGNING_ALLOWED'] = \"NO\"
+                end
+            end
+          end" >> Podfile
         working-directory: source
       - name: Pods Install
         run: pod install
