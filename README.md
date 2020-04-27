@@ -1,3 +1,2 @@
-# iosApp_template
+# iosNoticiasJunta
 Template for automatic publish iosApp
-a
