@@ -17,14 +17,13 @@ jobs:
       DEVELOPMENT_TEAM: 2P43RZUB7Q
 
     steps:
+      - uses: actions/checkout@v2.1.0
       - name: Get source from external repo
         run: git clone https://${{ secrets.REPO_USER }}:${{ secrets.REPO_PASS }}@gitlab.juntadeandalucia.es/noticias-portavoz/ios-app-noticias-portavoz.git source --depth 1
       - name: Switch XCode Version
         run: sudo xcode-select -s /Applications/Xcode_11.2.1.app
       - name: Setup cert
-        run: |
-            ls
-            ./.github/secrets/decrypt_certs.sh
+        run: ./.github/secrets/decrypt_certs.sh
         env:
           IOS_CERTIFICATE_PASS: ${{ secrets.IOS_CERTIFICATE_PASS }}
           ENCRYPT_PASS: ${{ secrets.ENCRYPT_PASS }}
