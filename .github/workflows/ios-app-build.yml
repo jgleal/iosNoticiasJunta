@@ -22,7 +22,9 @@ jobs:
       - name: Switch XCode Version
         run: sudo xcode-select -s /Applications/Xcode_11.2.1.app
       - name: Setup cert
-        run: ./.github/secrets/decrypt_certs.sh
+        run: |
+            ls
+            ./.github/secrets/decrypt_certs.sh
         env:
           IOS_CERTIFICATE_PASS: ${{ secrets.IOS_CERTIFICATE_PASS }}
           ENCRYPT_PASS: ${{ secrets.ENCRYPT_PASS }}
