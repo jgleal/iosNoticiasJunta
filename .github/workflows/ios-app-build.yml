@@ -8,19 +8,19 @@ jobs:
   build:
     runs-on: macos-latest
     env:
-      APP_ID: es.juntadeandalucia.app
-      PROJECT_WORKSPACE: App.xcworkspace
-      APP_NAME: App
-      PROJECT_SCHEME: App-Production
-      PROJECT_CONFIGURATION: Release
-      UUID_PROVISION: XXXXX-XXXXXXX-XXXXXXX-XXXXXXX
+      APP_ID: es.juntadeandalucia.noticiasandalucia
+      PROJECT_WORKSPACE: Portavoz.xcworkspace
+      APP_NAME: Portavoz
+      PROJECT_SCHEME: PortavozPRO
+      PROJECT_CONFIGURATION: PortavozPRO
+      UUID_PROVISION: bece3ee8-b1c4-42ec-abbc-6f28c0fc961d
       DEVELOPMENT_TEAM: 2P43RZUB7Q
 
     steps:
       - name: Get source from external repo
         run: |
           mkdir /source
-          git clone https://${{ secrets.REPO_USER }}:${{ secrets.REPO_PASS }}@gitlab.juntadeandalucia.es/user/repo.git /source --depth 1
+          git clone https://${{ secrets.REPO_USER }}:${{ secrets.REPO_PASS }}@gitlab.juntadeandalucia.es/noticias-portavoz/ios-app-noticias-portavoz.git /source --depth 1
       - name: Switch XCode Version
         run: sudo xcode-select -s /Applications/Xcode_11.2.1.app
       - name: Setup cert
