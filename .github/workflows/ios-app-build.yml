@@ -18,9 +18,7 @@ jobs:
 
     steps:
       - name: Get source from external repo
-        run: |
-          mkdir /source
-          git clone https://${{ secrets.REPO_USER }}:${{ secrets.REPO_PASS }}@gitlab.juntadeandalucia.es/noticias-portavoz/ios-app-noticias-portavoz.git /source --depth 1
+        run: git clone https://${{ secrets.REPO_USER }}:${{ secrets.REPO_PASS }}@gitlab.juntadeandalucia.es/noticias-portavoz/ios-app-noticias-portavoz.git source --depth 1
       - name: Switch XCode Version
         run: sudo xcode-select -s /Applications/Xcode_11.2.1.app
       - name: Setup cert
