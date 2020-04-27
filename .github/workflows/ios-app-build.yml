@@ -1,0 +1,68 @@
+name: Build iOS app
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    env:
+      APP_ID: es.juntadeandalucia.app
+      PROJECT_WORKSPACE: App.xcworkspace
+      APP_NAME: App
+      PROJECT_SCHEME: App-Production
+      PROJECT_CONFIGURATION: Release
+      UUID_PROVISION: XXXXX-XXXXXXX-XXXXXXX-XXXXXXX
+      DEVELOPMENT_TEAM: 2P43RZUB7Q
+
+    steps:
+      - name: Get source from external repo
+        run: |
+          mkdir /source
+          git clone https://${{ secrets.REPO_USER }}:${{ secrets.REPO_PASS }}@gitlab.juntadeandalucia.es/user/repo.git /source --depth 1
+      - name: Switch XCode Version
+        run: sudo xcode-select -s /Applications/Xcode_11.2.1.app
+      - name: Setup cert
+        run: ./.github/secrets/decrypt_certs.sh
+        env:
+          IOS_CERTIFICATE_PASS: ${{ secrets.IOS_CERTIFICATE_PASS }}
+          ENCRYPT_PASS: ${{ secrets.ENCRYPT_PASS }}
+      - name: Pods Install
+        run: pod install
+        working-directory: source
+      - name: Build app
+        run: |
+          xcodebuild archive \
+           -workspace "$PROJECT_WORKSPACE" \
+           -scheme "$PROJECT_SCHEME" \
+           -sdk iphoneos13.2 \
+           -configuration "$PROJECT_CONFIGURATION" \
+           -archivePath $PWD/build/app_build.xcarchive \
+           IPHONEOS_DEPLOYMENT_TARGET=10.0 \
+           CODE_SIGN_IDENTITY="iPhone Distribution" \
+           DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM" \
+           PROVISIONING_PROFILE="$UUID_PROVISION" \
+           CODE_SIGN_STYLE="Manual"
+        working-directory: source
+      - name: Create ExportOptions
+        run: create_export.sh
+      - name: Export IPA
+        run: |
+          xcodebuild -exportArchive \
+          -exportPath $PWD/build \
+          -archivePath $PWD/build/app_build.xcarchive \
+          -exportOptionsPlist $PWD/ExportOptions.plist
+        working-directory: source
+      - name: Upload build to action
+        uses: actions/upload-artifact@v1
+        with:
+          name: 'app_build' #not accepts env variable i.e. $APP_NAME
+          path: './source/build/'
+#      - name: Publish ipa to iTunes Connect
+#        run: xcrun altool --upload-app --type ios \
+#              --file "app/platforms/ios/build/$APP_NAME.ipa"
+#  --username "${APPLE_ID_USER}" --password "${APPLE_ID_PASS}"
+#        env:
+#           APPLE_ID_USER: ${{ secrets.APPLE_USER }}
+#           APPLE_ID_PASS: ${{ secrets.APPLE_PASS }}
