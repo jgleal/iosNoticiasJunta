@@ -76,7 +76,8 @@ jobs:
 #              --file "$PWD/build/app_build.ipa" \
 #              --username "${{secrets.APPLE_USER}}" --password "${{secrets.APPLE_PASS}}" > logs/publish_ipa.log
 #        working-directory: source  
-      - name: Create zip logs        
+      - name: Create zip logs
+        if: always()     
         run: zip logs.zip -r logs
         working-directory: source
       - name: Send email
