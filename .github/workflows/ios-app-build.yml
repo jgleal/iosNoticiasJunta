@@ -79,7 +79,8 @@ jobs:
       - name: Create zip logs        
         run: zip logs.zip -r logs
         working-directory: source
-      - name: Send email       
+      - name: Send email
+        if: always()
         uses: dawidd6/action-send-mail@v2.2.0        
         with:
           server_address: mail.juntadeandalucia.es
