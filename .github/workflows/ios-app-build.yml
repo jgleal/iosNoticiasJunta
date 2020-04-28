@@ -50,13 +50,14 @@ jobs:
            -sdk iphoneos13.2 \
            -configuration "$PROJECT_CONFIGURATION" \
            -archivePath $PWD/build/app_build.xcarchive \
-           IPHONEOS_DEPLOYMENT_TARGET=10.0 \
-           CODE_SIGNING_REQUIRED="NO" \
-           CODE_SIGNING_ALLOWED="NO"
-#           CODE_SIGN_IDENTITY="Apple Distribution" \
-#           DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM" \
-#           PROVISIONING_PROFILE="$UUID_PROVISION" \
-#           CODE_SIGN_STYLE="Manual"
+           CODE_SIGN_IDENTITY="Apple Distribution" \
+           DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM" \
+           PROVISIONING_PROFILE="$UUID_PROVISION" \
+           CODE_SIGN_STYLE="Manual" \
+#           "OTHER_CODE_SIGN_FLAGS=--keychain '~/Library/Keychains/build.keychain'"
+#           IPHONEOS_DEPLOYMENT_TARGET=10.0 \
+#           CODE_SIGNING_REQUIRED="NO" \
+#           CODE_SIGNING_ALLOWED="NO" \
         working-directory: source
       - name: Create ExportOptions
         run: create_export.sh
