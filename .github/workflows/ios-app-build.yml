@@ -79,11 +79,10 @@ jobs:
         with:
           name: logs
           path: './source/logs/'
-      - uses: actions/download-artifact@v1
+      - name: Create zip logs
         if: failure()
-        with:
-          name: logs
-          path: './source/logs/'
+        run: zip logs.zip -r logs
+        working-directory: source
       - name: Send email
         if: failure()
         uses: dawidd6/action-send-mail@v2.2.0        
@@ -107,7 +106,7 @@ jobs:
           # Content-Type HTTP header (text/html or text/plain)
           #content_type: # optional, default is text/plain
           # Files that will be added to mail message attachments (separated with comma)
-          attachments: ./source/logs/logs.zip
+          attachments: ./source/logs.zip
         
        #      - name: Publish ipa to iTunes Connect
 #        run: xcrun altool --upload-app --type ios \
