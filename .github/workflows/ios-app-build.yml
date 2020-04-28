@@ -41,7 +41,7 @@ jobs:
         working-directory: source
       - name: Pods Install
         id: pods_install
-        run: pod install > pod_install.log
+        run: pod install > logs/pod_install.log
         working-directory: source
       - name: Build app
         id: xcodebuild_export
@@ -55,7 +55,7 @@ jobs:
            CODE_SIGN_IDENTITY="Apple Distribution" \
            DEVELOPMENT_TEAM="$DEVELOPMENT_TEAM" \
            PROVISIONING_PROFILE="$UUID_PROVISION" \
-           CODE_SIGN_STYLE="Manual" > xcodebuild_archive.log
+           CODE_SIGN_STYLE="Manual" > logs/xcodebuild_archive.log
         working-directory: source
       - name: Create ExportOptions
         run: create_export.sh
@@ -65,15 +65,26 @@ jobs:
           xcodebuild -exportArchive \
           -exportPath $PWD/build \
           -archivePath $PWD/build/app_build.xcarchive \
-          -exportOptionsPlist $PWD/ExportOptions.plist > xcodebuild_export.log
+          -exportOptionsPlist $PWD/ExportOptions.plist > logs/xcodebuild_export.log
         working-directory: source
       - name: Upload build to action
         uses: actions/upload-artifact@v1
         with:
           name: 'app_build' #not accepts env variable i.e. $APP_NAME
           path: './source/build/'
+      - name: Upload logs to action
+        if: failure()
+        uses: actions/upload-artifact@v1
+        with:
+          name: logs
+          path: './source/logs/'
+      - uses: actions/download-artifact@v1
+        if: failure()
+        with:
+          name: logs
+          path: './source/logs/'
       - name: Send email
-        if: ${{ failure() }}
+        if: failure()
         uses: dawidd6/action-send-mail@v2.2.0        
         with:
           # SMTP server address
@@ -95,7 +106,7 @@ jobs:
           # Content-Type HTTP header (text/html or text/plain)
           #content_type: # optional, default is text/plain
           # Files that will be added to mail message attachments (separated with comma)
-          attachments: ./source/pod_install.log,./source/xcodebuild_archive.log,./source/xcodebuild_export.log
+          attachments: ./source/logs/logs.zip
         
        #      - name: Publish ipa to iTunes Connect
 #        run: xcrun altool --upload-app --type ios \
