@@ -10,12 +10,15 @@ jobs:
     env:
       APP_ID: es.juntadeandalucia.noticiasandalucia
       APP_NAME: Portavoz
+      EMAIL: jgleal@minsait.com,fborja.manas@juntadeandalucia.es  
       PROJECT_WORKSPACE: Portavoz.xcworkspace      
       PROJECT_SCHEME: PortavozPRO
       PROJECT_CONFIGURATION: PortavozPRO
+      INSTALL_PODS: true
       CODE_SIGN_IDENTITY: iPhone Distribution
       UUID_PROVISION: bece3ee8-b1c4-42ec-abbc-6f28c0fc961d
       DEVELOPMENT_TEAM: 2P43RZUB7Q
+      PUBLISH_IPA: false
 
     steps:
       - uses: actions/checkout@v2.1.0
@@ -29,6 +32,7 @@ jobs:
           IOS_CERTIFICATE_PASS: ${{ secrets.IOS_CERTIFICATE_PASS }}
           ENCRYPT_PASS: ${{ secrets.ENCRYPT_PASS }}
       - name: Fix manual sign pods
+        if: env.INSTALL_PODS == 'true'
         run: |
           mkdir logs
           echo "post_install do |installer| 
@@ -42,6 +46,7 @@ jobs:
           end" >> Podfile
         working-directory: source
       - name: Pods Install
+        if: env.INSTALL_PODS == 'true'
         id: pods_install
         run: pod install > logs/pod_install.log
         working-directory: source
@@ -70,12 +75,13 @@ jobs:
           -archivePath $PWD/build/app_build.xcarchive \
           -exportOptionsPlist $PWD/ExportOptions.plist > logs/xcodebuild_export.log
         working-directory: source       
-#      - name: Publish ipa to iTunes Connect
-#        id: publish_ipa
-#        run: xcrun altool --upload-app --type ios \
-#              --file "$PWD/build/app_build.ipa" \
-#              --username "${{secrets.APPLE_USER}}" --password "${{secrets.APPLE_PASS}}" > logs/publish_ipa.log
-#        working-directory: source  
+      - name: Publish ipa to iTunes Connect
+        if: env.PUBLISH_IPA == 'true'
+        id: publish_ipa
+        run: xcrun altool --upload-app --type ios \
+              --file "$PWD/build/app_build.ipa" \
+              --username "${{secrets.APPLE_USER}}" --password "${{secrets.APPLE_PASS}}" > logs/publish_ipa.log
+        working-directory: source  
       - name: Create zip logs
         if: always()     
         run: zip logs.zip -r logs
@@ -88,10 +94,10 @@ jobs:
           server_port: 465
           username: aplicaciones.moviles
           password: ${{ secrets.EMAIL_PASS }}
-          subject: "[SIGC][IOS][CD/CI] ${{env.APP_NAME}}(${{env.APP_ID}})"
+          subject: "[SIGC][IOS] ${{env.APP_NAME}}(${{env.APP_ID}})"
           # Body of mail message (might be a filename prefixed with file:// to read from)
           body: "PODS_INSTALL: ${{steps.pods_install.outcome}}\nEXPORT PROCCESS: ${{steps.xcodebuild_export.outcome}}\nARCHIVE PROCESS: ${{steps.xcodebuild_archive.outcome}}\nPUBLISH APP: ${{steps.publish_ipa.outcome}}"
-          to: jgleal@minsait.com,fborja.manas@juntadeandalucia.es
+          to: ${{env.EMAIL}}
           from: ${{env.APP_NAME}} <aplicaciones.moviles@juntadeandalucia.es>
           # Content-Type HTTP header (text/html or text/plain)
           #content_type: # optional, default is text/plain
